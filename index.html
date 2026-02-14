@@ -525,7 +525,7 @@
       <div id="welcome-screen" class="quiz-card fade-in">
         <h2 class="question-title">Ready to find your match?</h2>
         <p style="color: var(--muted); margin-bottom: 2rem; line-height: 1.6;">
-          This quiz evaluates your needs across coding, creativity, research, and speed to recommend the best model from the current top frontier: Gemini, Claude, Grok, ChatGPT, and more.
+          This quiz evaluates your needs across coding, creativity, research, and speed to recommend the best model from the current top frontier: Gemini, Claude, Grok, ChatGPT, Llama, DeepSeek, and more.
         </p>
         <button class="restart-btn" onclick="startQuiz()">Start the Quiz</button>
       </div>
@@ -535,7 +535,7 @@
         <div class="progress-container">
           <div id="progress-bar" class="progress-bar"></div>
         </div>
-        <p id="question-number" style="font-family: 'JetBrains Mono'; font-size: 0.7rem; color: var(--accent); margin: 1.5rem 0 0.5rem; text-transform: uppercase;">Question 1 of 4</p>
+        <p id="question-number" style="font-family: 'JetBrains Mono'; font-size: 0.7rem; color: var(--accent); margin: 1.5rem 0 0.5rem; text-transform: uppercase;">Question 1 of 8</p>
         <h2 id="question-text" class="question-title">What is your primary use case?</h2>
         <div id="options-container" class="options-grid">
           <!-- Options will be injected here -->
@@ -595,33 +595,65 @@
       {
         text: "What is your primary use case for the AI model?",
         options: [
-          { text: "Coding & Technical Tasks", weights: { qwen: 3, mistral: 2, chatgpt: 1, gemini: 1 } },
-          { text: "Creative Writing & Nuance", weights: { claude: 3, chatgpt: 1, gemini: 1 } },
-          { text: "Deep Research & Fact-finding", weights: { perplexity: 3, grok: 1, gemini: 1 } },
-          { text: "Daily Conversation & Assistance", weights: { chatgpt: 2, grok: 2, claude: 1 } }
+          { text: "Coding & Technical Tasks", weights: { deepseek: 3, qwen: 3, llama: 2, mistral: 2, chatgpt: 1, gemini: 1 } },
+          { text: "Creative Writing & Nuance", weights: { claude: 3, chatgpt: 1, gemini: 1, grok: 1 } },
+          { text: "Deep Research & Fact-finding", weights: { perplexity: 3, grok: 1, gemini: 1, claude: 1 } },
+          { text: "Daily Conversation & Assistance", weights: { chatgpt: 2, grok: 2, claude: 1, gemini: 1 } }
         ]
       },
       {
         text: "Do you prefer a model that is more creative or analytical?",
         options: [
-          { text: "Creative: I want style and personality.", weights: { claude: 3, chatgpt: 1, grok: 1 } },
-          { text: "Analytical: I want raw logic and facts.", weights: { gemini: 2, qwen: 2, mistral: 1, perplexity: 1 } }
+          { text: "Creative: I want style and personality.", weights: { claude: 3, chatgpt: 1, grok: 1, gemini: 1 } },
+          { text: "Analytical: I want raw logic and facts.", weights: { gemini: 2, qwen: 2, deepseek: 2, mistral: 1, perplexity: 1, llama: 1 } }
         ]
       },
       {
         text: "How important is response speed to you?",
         options: [
-          { text: "Instant: Speed is everything.", weights: { mistral: 3, gemini: 2, grok: 1 } },
-          { text: "Quality: I can wait for a better answer.", weights: { claude: 2, chatgpt: 2, perplexity: 1 } }
+          { text: "Instant: Speed is everything.", weights: { mistral: 3, gemma: 3, deepseek: 2, gemini: 2, grok: 1 } },
+          { text: "Quality: I can wait for a better answer.", weights: { claude: 3, chatgpt: 2, perplexity: 1, llama: 1 } }
         ]
       },
       {
         text: "Do you need specific advanced capabilities?",
         options: [
-          { text: "Image Generation & Vision", weights: { chatgpt: 3, gemini: 2 } },
-          { text: "Real-time Web Search & News", weights: { perplexity: 3, grok: 2, chatgpt: 1 } },
-          { text: "Large File Context (Reading entire docs)", weights: { claude: 3, gemini: 2 } },
-          { text: "Open Source / Local Control", weights: { mistral: 3, qwen: 2 } }
+          { text: "Image Generation & Vision", weights: { chatgpt: 3, gemini: 2, grok: 1 } },
+          { text: "Real-time Web Search & News", weights: { perplexity: 3, grok: 2, chatgpt: 1, gemini: 1 } },
+          { text: "Large File Context (Reading entire docs)", weights: { gemini: 4, claude: 3 } },
+          { text: "Open Source / Local Control", weights: { llama: 3, mistral: 3, qwen: 2, gemma: 2, deepseek: 1 } }
+        ]
+      },
+      {
+        text: "How do you feel about privacy and data usage?",
+        options: [
+          { text: "Total Privacy: I want to run it locally.", weights: { llama: 4, gemma: 3, mistral: 2 } },
+          { text: "High Safety: I prefer cloud but highly regulated.", weights: { claude: 3, gemini: 2, chatgpt: 1 } },
+          { text: "Results First: I just want the best output.", weights: { chatgpt: 3, gemini: 2, deepseek: 2 } }
+        ]
+      },
+      {
+        text: "What is your budget for AI tools?",
+        options: [
+          { text: "Free / Open-Source focused", weights: { llama: 3, mistral: 2, gemma: 2 } },
+          { text: "Premium Subscription (e.g. $20/mo)", weights: { chatgpt: 3, claude: 3, gemini: 2 } },
+          { text: "Pay-as-you-go / Cheap API", weights: { deepseek: 4, qwen: 2, mistral: 2 } }
+        ]
+      },
+      {
+        text: "How much 'personality' do you want in your AI?",
+        options: [
+          { text: "Professional & Neutral", weights: { claude: 3, gemini: 2 } },
+          { text: "Witty & Edgy", weights: { grok: 3, chatgpt: 1 } },
+          { text: "Minimal & Direct (Just the facts)", weights: { deepseek: 3, qwen: 3, mistral: 2 } }
+        ]
+      },
+      {
+        text: "Which ecosystem do you use the most?",
+        options: [
+          { text: "Google (Docs, Gmail, Drive)", weights: { gemini: 4, gemma: 2 } },
+          { text: "Microsoft / Office 365", weights: { chatgpt: 3 } },
+          { text: "Independent (Web-based apps)", weights: { claude: 3, perplexity: 2, deepseek: 2 } }
         ]
       }
     ];
@@ -822,12 +854,96 @@
             <li>Users who don't trust AI hallucinations</li>
           </ul>
         `
+      },
+      llama: {
+        name: "Llama 3",
+        tagline: "Meta's Open Source Titan",
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+        desc: "The king of open-source. Meta's latest model brings frontier-level performance to the open community, allowing for private, local, and highly customizable deployments.",
+        url: "https://llama.meta.com",
+        details: `
+          <h3>Overview</h3>
+          <p>Llama 3 is Meta's most capable open-source large language model to date. It's designed to be highly versatile, efficient, and accessible, sparking a new wave of innovation in the open AI community.</p>
+          
+          <h3>Key Strengths</h3>
+          <ul>
+            <li>State-of-the-art performance for open-weights</li>
+            <li>Highly customizable and fine-tunable</li>
+            <li>Large community support and ecosystem</li>
+            <li>Excellent reasoning and coding capabilities</li>
+            <li>Available for local deployment for maximum privacy</li>
+          </ul>
+          
+          <h3>Best For</h3>
+          <ul>
+            <li>Developers wanting to build on open weights</li>
+            <li>Privacy-conscious users running models locally</li>
+            <li>Researchers studying model behavior</li>
+            <li>Custom enterprise solutions</li>
+          </ul>
+        `
+      },
+      deepseek: {
+        name: "DeepSeek",
+        tagline: "The Efficiency Revolutionary",
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/></svg>',
+        desc: "The new standard for price-to-performance. DeepSeek delivers incredible coding and math capabilities at a fraction of the cost of other frontier models.",
+        url: "https://www.deepseek.com/",
+        details: `
+          <h3>Overview</h3>
+          <p>DeepSeek is a rising star in the AI world, known for its extremely efficient training and inference. Its Coder and V3 models have set new benchmarks for what's possible with optimized architectures.</p>
+          
+          <h3>Key Strengths</h3>
+          <ul>
+            <li>Top-tier coding performance (DeepSeek-Coder)</li>
+            <li>Remarkable mathematical reasoning</li>
+            <li>Extremely low cost and high efficiency</li>
+            <li>Strong performance on logic benchmarks</li>
+            <li>Rapidly evolving and improving</li>
+          </ul>
+          
+          <h3>Best For</h3>
+          <ul>
+            <li>Budget-conscious developers</li>
+            <li>Intense coding and debugging sessions</li>
+            <li>Math and logic problem solving</li>
+            <li>Building cost-effective AI agents</li>
+          </ul>
+        `
+      },
+      gemma: {
+        name: "Gemma",
+        tagline: "Google's Lightweight Gem",
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9z"/></svg>',
+        desc: "Google's open-weights model inspired by Gemini. It's built for developers who want Google's research excellence in a smaller, more manageable package for local use.",
+        url: "https://ai.google.dev/gemma",
+        details: `
+          <h3>Overview</h3>
+          <p>Gemma is a family of lightweight, state-of-the-art open models built from the same technology used to create the Gemini models. It's designed for responsible AI development and efficient deployment.</p>
+          
+          <h3>Key Strengths</h3>
+          <ul>
+            <li>High performance for its small size</li>
+            <li>Easy to run on consumer hardware (laptops)</li>
+            <li>Tight integration with Google Cloud and Vertex AI</li>
+            <li>Focus on safety and responsible development</li>
+            <li>Excellent for edge device applications</li>
+          </ul>
+          
+          <h3>Best For</h3>
+          <ul>
+            <li>Local application development</li>
+            <li>Learning and experimenting with LLMs</li>
+            <li>Resource-constrained environments</li>
+            <li>Fine-tuning on specific, narrow tasks</li>
+          </ul>
+        `
       }
     };
 
     let currentQuestion = 0;
     let scores = {
-      gemini: 0, claude: 0, grok: 0, chatgpt: 0, qwen: 0, mistral: 0, perplexity: 0
+      gemini: 0, claude: 0, grok: 0, chatgpt: 0, qwen: 0, mistral: 0, perplexity: 0, llama: 0, deepseek: 0, gemma: 0
     };
     let matchedModelId = 'gemini';
 
@@ -921,7 +1037,7 @@
     function restartQuiz() {
       currentQuestion = 0;
       scores = {
-        gemini: 0, claude: 0, grok: 0, chatgpt: 0, qwen: 0, mistral: 0, perplexity: 0
+        gemini: 0, claude: 0, grok: 0, chatgpt: 0, qwen: 0, mistral: 0, perplexity: 0, llama: 0, deepseek: 0, gemma: 0
       };
       document.getElementById('results-screen').classList.add('hidden');
       document.getElementById('welcome-screen').classList.remove('hidden');
