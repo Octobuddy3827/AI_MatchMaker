@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Matchmaker — Find Your Perfect Model</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a1419;
+      --bg-subtle: #0d1a21;
+      --surface: #0f1e28;
+      --surface-hover: #132830;
+      --border: #1e3a47;
+      --text: #e2f0f6;
+      --muted: #7a9cad;
+      --blue: #0ea5e9;
+      --blue-dim: #0284c7;
+      --green: #10b981;
+      --green-dim: #059669;
+      --teal: #14b8a6;
+      --accent: #06b6d4;
+      --glow-blue: rgba(14, 165, 233, 0.2);
+      --glow-green: rgba(16, 185, 129, 0.2);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Syne', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .bg-pattern {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(180deg, var(--bg) 0%, var(--bg-subtle) 50%, var(--bg) 100%),
+        linear-gradient(rgba(14, 165, 233, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16, 185, 129, 0.04) 1px, transparent 1px);
+      background-size: 100% 100%, 40px 40px, 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 4rem 1.5rem 6rem;
+      width: 100%;
+      flex: 1;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3.5rem;
+    }
+
+    .badge {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1rem;
+      padding: 0.35rem 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: rgba(6, 182, 212, 0.12);
+    }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      background: linear-gradient(135deg, var(--text) 0%, var(--blue) 50%, var(--green) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.05rem;
+      color: var(--muted);
+      margin-top: 0.75rem;
+      font-weight: 400;
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.5;
+    }
+
+    /* Quiz Styles */
+    .quiz-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.5rem;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    .hidden {
+      display: none;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .question-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      line-height: 1.3;
+    }
+
+    .options-grid {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .option-btn {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 1.25rem;
+      border-radius: 12px;
+      text-align: left;
+      font-family: inherit;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .option-btn:hover {
+      background: var(--surface-hover);
+      border-color: var(--blue);
+      transform: translateX(5px);
+    }
+
+    .option-btn.selected {
+      background: rgba(14, 165, 233, 0.1);
+      border-color: var(--blue);
+      box-shadow: 0 0 15px var(--glow-blue);
+    }
+
+    .btn-icon {
+      width: 2rem;
+      height: 2rem;
+      background: var(--border);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .option-btn:hover .btn-icon {
+      background: var(--blue);
+      color: var(--bg);
+    }
+
+    .progress-container {
+      margin-top: 2rem;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--blue), var(--green));
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+
+    /* Result Styles */
+    .result-card {
+      text-align: center;
+    }
+
+    .result-icon {
+      width: 5rem;
+      height: 5rem;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid var(--green);
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      color: var(--green);
+      box-shadow: 0 0 30px var(--glow-green);
+    }
+
+    .result-icon svg {
+      width: 2.5rem;
+      height: 2.5rem;
+    }
+
+    .model-badge {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--green);
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .result-model-name {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border-bottom: 2px solid transparent;
+      display: inline-block;
+    }
+
+    .result-model-name:hover {
+      color: var(--blue);
+      border-bottom-color: var(--blue);
+    }
+
+    .result-description {
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 2rem;
+      font-size: 1.1rem;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .restart-btn {
+      background: linear-gradient(135deg, var(--blue), var(--blue-dim));
+      color: var(--bg);
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 999px;
+      font-family: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .restart-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px var(--glow-blue);
+    }
+
+    .access-btn {
+      background: linear-gradient(135deg, var(--green), var(--green-dim));
+      color: var(--bg);
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 999px;
+      font-family: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .access-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px var(--glow-green);
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(4px);
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal-content {
+      background: var(--surface);
+      margin: 5vh auto;
+      padding: 2.5rem;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      animation: slideIn 0.3s ease;
+      position: relative;
+    }
+
+    .close {
+      position: absolute;
+      right: 1.5rem;
+      top: 1rem;
+      color: var(--muted);
+      font-size: 2rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .close:hover {
+      color: var(--text);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+
+    .modal-icon {
+      width: 4rem;
+      height: 4rem;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid var(--green);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--green);
+      flex-shrink: 0;
+    }
+
+    .modal-icon svg {
+      width: 2rem;
+      height: 2rem;
+    }
+
+    .modal-header-text h2 {
+      font-size: 2rem;
+      margin-bottom: 0.25rem;
+      font-weight: 800;
+    }
+
+    .modal-header-text p {
+      color: var(--accent);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .modal-body {
+      margin-bottom: 2rem;
+    }
+
+    .modal-body h3 {
+      color: var(--blue);
+      margin-top: 1.5rem;
+      margin-bottom: 0.75rem;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .modal-body p {
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+
+    .modal-body ul {
+      list-style: none;
+      padding-left: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-body li {
+      color: var(--text);
+      margin-bottom: 0.6rem;
+      padding-left: 1.5rem;
+      position: relative;
+      font-size: 0.95rem;
+    }
+
+    .modal-body li:before {
+      content: "→";
+      position: absolute;
+      left: 0;
+      color: var(--blue);
+      font-weight: bold;
+    }
+
+    .modal-footer {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .modal-access-btn {
+      background: linear-gradient(135deg, var(--green), var(--green-dim));
+      color: var(--bg);
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 999px;
+      font-family: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .modal-access-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px var(--glow-green);
+    }
+
+    .modal-close-btn {
+      background: var(--bg-subtle);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 1rem 2rem;
+      border-radius: 999px;
+      font-family: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .modal-close-btn:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      border-top: 1px solid var(--border);
+      margin-top: auto;
+    }
+
+    .footer-note {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.5s ease forwards;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .quiz-card {
+        padding: 1.5rem;
+      }
+      .question-title {
+        font-size: 1.25rem;
+      }
+      .modal-content {
+        margin: 5% auto;
+        width: 95%;
+        padding: 1.5rem;
+      }
+      .button-group {
+        flex-direction: column;
+      }
+      .restart-btn, .access-btn, .modal-access-btn {
+        width: 100%;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-pattern"></div>
+  <div class="container">
+    <header>
+      <span class="badge">Interactive Quiz</span>
+      <h1>AI Matchmaker</h1>
+      <p class="subtitle">Finding the right AI can be overwhelming. Answer a few questions and we'll find your perfect neural partner.</p>
+    </header>
+
+    <main id="quiz-container">
+      <!-- Welcome Screen -->
+      <div id="welcome-screen" class="quiz-card fade-in">
+        <h2 class="question-title">Ready to find your match?</h2>
+        <p style="color: var(--muted); margin-bottom: 2rem; line-height: 1.6;">
+          This quiz evaluates your needs across coding, creativity, research, and speed to recommend the best model from the current top frontier: Gemini, Claude, Grok, ChatGPT, and more.
+        </p>
+        <button class="restart-btn" onclick="startQuiz()">Start the Quiz</button>
+      </div>
+
+      <!-- Question Screen -->
+      <div id="question-screen" class="quiz-card hidden">
+        <div class="progress-container">
+          <div id="progress-bar" class="progress-bar"></div>
+        </div>
+        <p id="question-number" style="font-family: 'JetBrains Mono'; font-size: 0.7rem; color: var(--accent); margin: 1.5rem 0 0.5rem; text-transform: uppercase;">Question 1 of 4</p>
+        <h2 id="question-text" class="question-title">What is your primary use case?</h2>
+        <div id="options-container" class="options-grid">
+          <!-- Options will be injected here -->
+        </div>
+      </div>
+
+      <!-- Results Screen -->
+      <div id="results-screen" class="quiz-card hidden">
+        <div class="result-card">
+          <div id="result-icon-container" class="result-icon">
+            <!-- Icon injected here -->
+          </div>
+          <span class="model-badge">Your Best Match</span>
+          <h2 id="result-name" class="result-model-name" onclick="openModal()">Gemini</h2>
+          <p id="result-desc" class="result-description">Description goes here.</p>
+          <div class="button-group">
+            <a id="access-link" href="#" class="access-btn" target="_blank">Access Model</a>
+            <button class="restart-btn" onclick="restartQuiz()">Try Again</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Modal for detailed AI info -->
+    <div id="modal" class="modal" onclick="closeModal(event)">
+      <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="close" onclick="closeModal()">&times;</span>
+        
+        <div class="modal-header">
+          <div id="modal-icon-container" class="modal-icon">
+            <!-- Icon injected here -->
+          </div>
+          <div class="modal-header-text">
+            <h2 id="modal-name">Model Name</h2>
+            <p id="modal-tagline">Brief tagline</p>
+          </div>
+        </div>
+
+        <div class="modal-body" id="modal-details">
+          <!-- Details injected here -->
+        </div>
+
+        <div class="modal-footer">
+          <a id="modal-access-link" href="#" class="modal-access-btn" target="_blank">Access Model</a>
+          <button class="modal-close-btn" onclick="closeModal()">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p class="footer-note">Based on 2025 AI benchmarks and ecosystem rankings.</p>
+    </footer>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        text: "What is your primary use case for the AI model?",
+        options: [
+          { text: "Coding & Technical Tasks", weights: { qwen: 3, mistral: 2, chatgpt: 1, gemini: 1 } },
+          { text: "Creative Writing & Nuance", weights: { claude: 3, chatgpt: 1, gemini: 1 } },
+          { text: "Deep Research & Fact-finding", weights: { perplexity: 3, grok: 1, gemini: 1 } },
+          { text: "Daily Conversation & Assistance", weights: { chatgpt: 2, grok: 2, claude: 1 } }
+        ]
+      },
+      {
+        text: "Do you prefer a model that is more creative or analytical?",
+        options: [
+          { text: "Creative: I want style and personality.", weights: { claude: 3, chatgpt: 1, grok: 1 } },
+          { text: "Analytical: I want raw logic and facts.", weights: { gemini: 2, qwen: 2, mistral: 1, perplexity: 1 } }
+        ]
+      },
+      {
+        text: "How important is response speed to you?",
+        options: [
+          { text: "Instant: Speed is everything.", weights: { mistral: 3, gemini: 2, grok: 1 } },
+          { text: "Quality: I can wait for a better answer.", weights: { claude: 2, chatgpt: 2, perplexity: 1 } }
+        ]
+      },
+      {
+        text: "Do you need specific advanced capabilities?",
+        options: [
+          { text: "Image Generation & Vision", weights: { chatgpt: 3, gemini: 2 } },
+          { text: "Real-time Web Search & News", weights: { perplexity: 3, grok: 2, chatgpt: 1 } },
+          { text: "Large File Context (Reading entire docs)", weights: { claude: 3, gemini: 2 } },
+          { text: "Open Source / Local Control", weights: { mistral: 3, qwen: 2 } }
+        ]
+      }
+    ];
+
+    const modelDetails = {
+      gemini: {
+        name: "Gemini",
+        tagline: "Google's Multimodal Powerhouse",
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L14 8h6l-4.5 4.5 2 6L12 16l-5.5 4.5 2-6L4 8h6l2-6z"/></svg>',
+        desc: "The powerhouse for the Google ecosystem. Excellent at multimodal tasks (vision/audio), fast inference, and handling massive amounts of data with its massive context window.",
+        url: "https://gemini.google.com",
+        details: `
+          <h3>Overview</h3>
+          <p>Google's Gemini is a state-of-the-art multimodal AI model designed to excel across text, images, audio, and video. It's deeply integrated with Google's ecosystem and offers exceptional performance on complex reasoning tasks.</p>
+          
+          <h3>Key Strengths</h3>
+          <ul>
+            <li>Multimodal capabilities (vision, audio, video)</li>
+            <li>Massive 2M+ token context window</li>
+            <li>Incredibly fast inference speeds</li>
+            <li>Superior mathematical and scientific reasoning</li>
+            <li>Deep integration with Google Workspace</li>
+          </ul>
+          
+          <h3>Best For</h3>
+          <ul>
+            <li>Advanced video and image analysis</li>
+            <li>Processing massive codebases or long PDFs</li>
+            <li>Developers building on Google Cloud</li>
+            <li>Users heavily invested in the Google ecosystem</li>
+          </ul>
+        `
+      },
+      claude: {
+        name: "Claude",
+        tagline: "Anthropic's Thoughtful AI",
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+        desc: "The intellectual choice. Renowned for its nuanced writing style, superior reasoning, and 'Constitution AI' approach which makes it feel more thoughtful and less robotic.",
+        url: "https://claude.ai",
+        details: `
+          <h3>Overview</h3>
+          <p>Claude is Anthropic's flagship AI assistant, trained using Constitutional AI principles. It's widely praised for its high degree of steerability, minimal "hallucinations," and remarkably human-like writing tone.</p>
+          
+          <h3>Key Strengths</h3>
+          <ul>
+            <li>Nuanced and sophisticated writing style</li>
+            <li>Top-tier complex reasoning and logic</li>
+            <li>Extremely high steerability and instruction following</li>
+            <li>Large 200k token context window</li>
+            <li>Lower refusal rates for complex prompts</li>
+          </ul>
+          
+          <h3>Best For</h3>
+          <ul>
+            <li>Creative writing and editing</li>
+            <li>Complex document analysis and summarization</li>
+            <li>Strategic planning and brainstorming</li>
+            <li>Coding tasks requiring deep logic</li>
+          </ul>
+        `
+      },
+      grok: {
+        name: "Grok",
+        tagline: "xAI's Real-Time Rebel",
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h8l-2 8 10-12h-8l2-8z"/></svg>',
+        desc: "The real-time rebel. Built by xAI with direct access to live data from X (formerly Twitter), making it the best for current events and witty, unfiltered conversation.",
+        url: "https://grok.x.ai",
+        details: `
+          <h3>Overview</h3>
+          <p>Grok is xAI's conversational AI with real-time access to the world via the X platform. It's designed to have a bit of wit, a rebellious streak, and a unique personality that sets it apart from more "corporate" AIs.</p>
+          
+          <h3>Key Strengths</h3>
+          <ul>
+            <li>Real-time access to global news via X</li>
+            <li>Witty, engaging, and less filtered personality</li>
+            <li>Fast processing and response times</li>
+            <li>Strong reasoning on current events</li>
+            <li>Minimal constraints compared to competitors</li>
+          </ul>
+          
+          <h3>Best For</h3>
+          <ul>
+            <li>Tracking live news and trending topics</li>
+            <li>Engaging in more "natural" or edgy conversation</li>
+            <li>Quick insights into social media sentiment</li>
+            <li>Users tired of over-sanitized AI responses</li>
+          </ul>
+        `
+      },
+      chatgpt: {
+        name: "ChatGPT",
+        tagline: "OpenAI's Versatile All-Rounder",
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 6 6c0 2.2-1.2 4-3 5.2V18a1 1 0 0 1-2 0v-3.8C7.2 13 6 11.2 6 9a6 6 0 0 0 6-6z"/><path d="M12 3v3"/></svg>',
+        desc: "The gold standard for versatility. With top-tier image generation (DALL-E), web browsing, and a massive app ecosystem, it's the most capable all-rounder for daily use.",
+        url: "https://chatgpt.com",
+        details: `
+          <h3>Overview</h3>
+          <p>The model that started the revolution. ChatGPT (o1 and GPT-4o) remains the most feature-rich platform, offering everything from advanced voice modes to custom GPTs and image creation.</p>
+          
+          <h3>Key Strengths</h3>
+          <ul>
+            <li>Best-in-class image generation (DALL-E 3)</li>
+            <li>Advanced data analysis and code execution</li>
+            <li>Massive ecosystem of Custom GPTs</li>
+            <li>Incredible voice interaction capabilities</li>
+            <li>Strong performance across all benchmarks</li>
+          </ul>
+          
+          <h3>Best For</h3>
+          <ul>
+            <li>General purpose daily assistance</li>
+            <li>Visual creators and artists</li>
+            <li>Data scientists and analysts</li>
+            <li>Users wanting the most "connected" AI</li>
+          </ul>
+        `
+      },
+      qwen: {
+        name: "Qwen",
+        tagline: "Alibaba's Coding Specialist",
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20z"/><path d="M12 6v6l4 2"/></svg>',
+        desc: "The coding specialist. Coming from Alibaba, it consistently punches above its weight in technical benchmarks, coding tasks, and multilingual requirements.",
+        url: "https://chat.qwenlm.ai/",
+        details: `
+          <h3>Overview</h3>
+          <p>Qwen is a series of powerful models from Alibaba Cloud. While highly capable in general tasks, it has gained a massive following for its exceptional performance in coding and technical problem-solving.</p>
+          
+          <h3>Key Strengths</h3>
+          <ul>
+            <li>Superior coding and technical reasoning</li>
+            <li>Excellent performance in mathematics</li>
+            <li>Strong multilingual capabilities (especially Asian languages)</li>
+            <li>Very efficient and fast response times</li>
+            <li>Competitive performance against much larger models</li>
+          </ul>
+          
+          <h3>Best For</h3>
+          <ul>
+            <li>Software developers and engineers</li>
+            <li>Mathematics and logic puzzles</li>
+            <li>Technical documentation and translation</li>
+            <li>High-performance API integration</li>
+          </ul>
+        `
+      },
+      mistral: {
+        name: "Mistral",
+        tagline: "The Efficiency Champion",
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M4 8h8m-8 8h12"/><path d="M2 4v16h20V4"/></svg>',
+        desc: "The efficiency champion. A French powerhouse that proves you don't need a trillion parameters to be smart. Great for developers and those who value speed and open-weights.",
+        url: "https://mistral.ai",
+        details: `
+          <h3>Overview</h3>
+          <p>Mistral AI, based in France, focuses on high-efficiency models. Their "small but mighty" approach has made them favorites for developers who want frontier-level intelligence with lower latency and costs.</p>
+          
+          <h3>Key Strengths</h3>
+          <ul>
+            <li>Extremely low latency and fast responses</li>
+            <li>High intelligence-to-parameter ratio</li>
+            <li>Strong open-weight availability</li>
+            <li>Excellent for RAG (Retrieval-Augmented Generation)</li>
+            <li>Strong European language support</li>
+          </ul>
+          
+          <h3>Best For</h3>
+          <ul>
+            <li>On-device or private cloud deployment</li>
+            <li>Developers building latency-sensitive apps</li>
+            <li>Cost-effective enterprise solutions</li>
+            <li>Users prioritizing speed above all else</li>
+          </ul>
+        `
+      },
+      perplexity: {
+        name: "Perplexity",
+        tagline: "The Research Engine",
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>',
+        desc: "The search evolved. It's not just a chatbot, it's a discovery engine that cites its sources, making it the absolute best for research and verify-as-you-go tasks.",
+        url: "https://www.perplexity.ai",
+        details: `
+          <h3>Overview</h3>
+          <p>Perplexity isn't just a model; it's a "knowledge engine." It uses multiple frontier models (including GPT-4 and Claude 3) to browse the web and synthesize answers with full citations.</p>
+          
+          <h3>Key Strengths</h3>
+          <ul>
+            <li>Real-time web browsing with source citations</li>
+            <li>Transparent links to every fact provided</li>
+            <li>Ability to toggle between different AI models</li>
+            <li>Excellent for academic and market research</li>
+            <li>"Pro" mode for deep multi-step searches</li>
+          </ul>
+          
+          <h3>Best For</h3>
+          <ul>
+            <li>Students and academic researchers</li>
+            <li>Market analysis and fact-checking</li>
+            <li>Getting current news with verified sources</li>
+            <li>Users who don't trust AI hallucinations</li>
+          </ul>
+        `
+      }
+    };
+
+    let currentQuestion = 0;
+    let scores = {
+      gemini: 0, claude: 0, grok: 0, chatgpt: 0, qwen: 0, mistral: 0, perplexity: 0
+    };
+    let matchedModelId = 'gemini';
+
+    function startQuiz() {
+      document.getElementById('welcome-screen').classList.add('hidden');
+      document.getElementById('question-screen').classList.remove('hidden');
+      showQuestion();
+    }
+
+    function showQuestion() {
+      const q = questions[currentQuestion];
+      document.getElementById('question-text').innerText = q.text;
+      document.getElementById('question-number').innerText = `Question ${currentQuestion + 1} of ${questions.length}`;
+      
+      const container = document.getElementById('options-container');
+      container.innerHTML = '';
+      
+      q.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn fade-in';
+        btn.style.animationDelay = `${idx * 0.1}s`;
+        btn.innerHTML = `
+          <div class="btn-icon">${idx + 1}</div>
+          <span>${opt.text}</span>
+        `;
+        btn.onclick = () => selectOption(opt.weights);
+        container.appendChild(btn);
+      });
+
+      const progress = ((currentQuestion) / questions.length) * 100;
+      document.getElementById('progress-bar').style.width = `${progress}%`;
+    }
+
+    function selectOption(weights) {
+      for (const model in weights) {
+        scores[model] += weights[model];
+      }
+
+      currentQuestion++;
+      if (currentQuestion < questions.length) {
+        showQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    function showResults() {
+      document.getElementById('question-screen').classList.add('hidden');
+      document.getElementById('results-screen').classList.remove('hidden');
+      document.getElementById('progress-bar').style.width = `100%`;
+
+      let bestModel = 'gemini';
+      let maxScore = -1;
+
+      for (const model in scores) {
+        if (scores[model] > maxScore) {
+          maxScore = scores[model];
+          bestModel = model;
+        }
+      }
+
+      matchedModelId = bestModel;
+      const result = modelDetails[bestModel];
+      document.getElementById('result-icon-container').innerHTML = result.icon;
+      document.getElementById('result-name').innerText = result.name;
+      document.getElementById('result-desc').innerText = result.desc;
+      document.getElementById('access-link').href = result.url;
+    }
+
+    function openModal() {
+      const details = modelDetails[matchedModelId];
+      document.getElementById('modal-icon-container').innerHTML = details.icon;
+      document.getElementById('modal-name').innerText = details.name;
+      document.getElementById('modal-tagline').innerText = details.tagline;
+      document.getElementById('modal-details').innerHTML = details.details;
+      document.getElementById('modal-access-link').href = details.url;
+      
+      const modal = document.getElementById('modal');
+      modal.style.display = 'block';
+      document.body.style.overflow = 'hidden'; // Prevent scroll
+    }
+
+    function closeModal(event) {
+      if (event && event.target !== document.getElementById('modal') && event.target.className !== 'close' && event.target.className !== 'modal-close-btn') {
+        return;
+      }
+      document.getElementById('modal').style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }
+
+    function restartQuiz() {
+      currentQuestion = 0;
+      scores = {
+        gemini: 0, claude: 0, grok: 0, chatgpt: 0, qwen: 0, mistral: 0, perplexity: 0
+      };
+      document.getElementById('results-screen').classList.add('hidden');
+      document.getElementById('welcome-screen').classList.remove('hidden');
+    }
+
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+  </script>
+</body>
+</html>
